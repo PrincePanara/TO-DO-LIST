@@ -13,7 +13,7 @@ export function TopBar({ onOpenSearch }: {onOpenSearch: () => void;}) {
 
   return (
     <header className="sticky top-0 z-30 border-b-3 border-ink bg-white/95 backdrop-blur dark:border-white dark:bg-[#1c1b21]/95">
-      <div className="flex items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="flex h-[88px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-lg font-bold uppercase leading-tight tracking-tight sm:text-2xl">
             {greeting()}, {firstName.toUpperCase()} <span aria-hidden>👋</span>

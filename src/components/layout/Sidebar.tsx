@@ -9,8 +9,8 @@ export function Sidebar() {
   const unread = notifications.filter((n) => !n.read).length;
 
   return (
-    <aside className="hidden lg:flex lg:w-[248px] xl:w-[268px] shrink-0 flex-col border-r-3 border-ink bg-white dark:border-white dark:bg-[#1c1b21]">
-      <div className="flex items-center gap-3 border-b-3 border-ink px-5 py-5 dark:border-white">
+    <aside className="sticky top-0 hidden h-screen shrink-0 flex-col border-r-3 border-ink bg-white lg:flex lg:w-[248px] xl:w-[268px] dark:border-white dark:bg-[#1c1b21]">
+      <div className="flex h-[88px] shrink-0 items-center gap-3 border-b-3 border-ink px-5 dark:border-white">
         <span className="flex h-11 w-11 items-center justify-center border-3 border-ink bg-brand font-display text-lg font-bold text-white shadow-brut-xs dark:border-white">
           QL
         </span>
