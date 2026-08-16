@@ -30,6 +30,11 @@ import { ProgressPage } from './pages/Progress';
 import { NotificationsPage } from './pages/Notifications';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
+import { SettingsAccount } from './pages/settings/SettingsAccount';
+import { SettingsAcademic } from './pages/settings/SettingsAcademic';
+import { SettingsNotifications } from './pages/settings/SettingsNotifications';
+import { SettingsAppearance } from './pages/settings/SettingsAppearance';
+import { SettingsData } from './pages/settings/SettingsData';
 import { ImportTimetable } from './pages/timetable/ImportTimetable';
 import { AnalyzeTimetable } from './pages/timetable/AnalyzeTimetable';
 import { ReviewTimetable } from './pages/timetable/ReviewTimetable';
@@ -92,6 +97,11 @@ export function App() {
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="settings" element={<Settings />} />
+                <Route path="settings/account" element={<SettingsAccount />} />
+                <Route path="settings/academic" element={<SettingsAcademic />} />
+                <Route path="settings/notifications" element={<SettingsNotifications />} />
+                <Route path="settings/appearance" element={<SettingsAppearance />} />
+                <Route path="settings/data" element={<SettingsData />} />
               </Route>
               <Route path="*" element={<Navigate to="/login" replace />} />
               </Routes>
