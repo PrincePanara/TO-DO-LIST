@@ -95,7 +95,7 @@ export function Splash() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.12, ease }}
           className="font-display text-5xl font-bold uppercase leading-none tracking-tight sm:text-7xl">
-          StudyForge
+          QUBESO LISTER
         </motion.h1>
 
         <motion.p
@@ -109,7 +109,7 @@ export function Splash() {
         <div
           className="mt-10 w-64 border-3 border-ink bg-white"
           role="progressbar"
-          aria-label="Loading StudyForge"
+          aria-label="Loading QUBESO LISTER"
           aria-valuenow={progress}
           aria-valuemin={0}
           aria-valuemax={100}>
