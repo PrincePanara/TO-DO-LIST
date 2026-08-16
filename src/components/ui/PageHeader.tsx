@@ -54,9 +54,9 @@ export function SearchField({
 
 }: {value: string;onChange: (v: string) => void;placeholder: string;label: string;}) {
   return (
-    <div className="relative">
+    <div className="relative flex items-center">
       <SearchIcon
-        className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2"
+        className="pointer-events-none absolute left-4 h-5 w-5"
         strokeWidth={3}
         aria-hidden />
       
