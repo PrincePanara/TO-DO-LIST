@@ -7,6 +7,7 @@ import {
   query, 
   serverTimestamp,
   getDoc,
+  getDocs,
   where,
   or
 } from 'firebase/firestore';
@@ -86,6 +87,34 @@ export function subscribeToUserProfile(uid: string, callback: (data: any) => voi
   }, (error) => {
     console.error(`Error subscribing to user profile:`, error);
   });
+}
+
+/**
+ * Fetch multiple user profiles by an array of UIDs
+ */
+export async function getProfilesByUids(uids: string[]) {
+  if (uids.length === 0) return {};
+  
+  const results: Record<string, any> = {};
+  
+  // chunk uids in arrays of 30 because Firestore 'in' query limit is 30
+  const chunks = [];
+  for (let i = 0; i < uids.length; i += 30) {
+    chunks.push(uids.slice(i, i + 30));
+  }
+  
+  await Promise.all(chunks.map(async (chunk) => {
+    const q = query(
+      collection(db, 'users'),
+      where('__name__', 'in', chunk)
+    );
+    const snapshot = await getDocs(q);
+    snapshot.forEach(doc => {
+      results[doc.id] = doc.data();
+    });
+  }));
+  
+  return results;
 }
 
 /**

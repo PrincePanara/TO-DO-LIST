@@ -31,7 +31,8 @@ import {
   updateUserProfile,
   subscribeToProjectTasks,
   upsertProjectTask,
-  deleteProjectTask
+  deleteProjectTask,
+  getProfilesByUids
 } from '../firebase/db';
 
 export type Theme = 'light' | 'dark';
@@ -461,4 +462,28 @@ export function useProjectTasks(projectId: string) {
   }, [user, projectId]);
 
   return tasks;
+}
+
+const profilesCache: Record<string, { name: string; email?: string; [key: string]: any }> = {};
+
+export function useUserProfiles(uids: string[]) {
+  const [profiles, setProfiles] = useState<Record<string, any>>(profilesCache);
+
+  useEffect(() => {
+    const missingUids = uids.filter(uid => !profilesCache[uid]);
+    if (missingUids.length === 0) return;
+
+    let mounted = true;
+    getProfilesByUids(missingUids).then(results => {
+      if (!mounted) return;
+      Object.assign(profilesCache, results);
+      setProfiles({ ...profilesCache });
+    }).catch(err => {
+      console.error('Failed to fetch user profiles:', err);
+    });
+
+    return () => { mounted = false; };
+  }, [JSON.stringify(uids)]);
+
+  return profiles;
 }

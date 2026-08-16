@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ExternalLinkIcon, PlusIcon, SendIcon, TrashIcon, UserCheckIcon, UserPlusIcon, UsersIcon, XIcon, ListTodoIcon } from 'lucide-react';
-import { useStudyForge, useProjectTasks } from '../contexts/StudyForgeContext';
+import { useStudyForge, useProjectTasks, useUserProfiles } from '../contexts/StudyForgeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuickAdd } from '../contexts/QuickAdd';
 import { Card, SectionHeading } from '../components/ui/Card';
@@ -76,6 +76,8 @@ export function ProjectDetail() {
 
   const members = project.members ?? [];
   const pendingInvites = project.pendingInvites ?? [];
+  const allUids = Array.from(new Set([project.ownerId, ...members, ...pendingInvites]));
+  const profiles = useUserProfiles(allUids);
 
   return (
     <div>
@@ -318,8 +320,8 @@ export function ProjectDetail() {
               <li className="flex items-center gap-3 border-3 border-ink bg-sun px-3 py-2 dark:border-white dark:bg-sun/20">
                 <UsersIcon className="h-4 w-4 shrink-0 text-ink dark:text-white" strokeWidth={3} aria-hidden />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-mono text-xs font-bold text-ink dark:text-white">
-                    {project.ownerId}
+                  <p className="truncate font-display text-sm font-bold text-ink dark:text-white">
+                    {profiles[project.ownerId]?.name || project.ownerId}
                   </p>
                   {project.ownerId === user?.uid && (
                     <p className="text-[10px] font-bold uppercase tracking-wide text-ink/60 dark:text-white/60">You</p>
@@ -336,7 +338,9 @@ export function ProjectDetail() {
                 >
                   <UserCheckIcon className="h-4 w-4 shrink-0 text-ok" strokeWidth={3} aria-hidden />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-mono text-xs font-bold dark:text-white">{uid}</p>
+                    <p className="truncate font-display text-sm font-bold dark:text-white">
+                      {profiles[uid]?.name || uid}
+                    </p>
                     {uid === user?.uid && (
                       <p className="text-[10px] font-bold uppercase tracking-wide text-ink/60 dark:text-white/60">You</p>
                     )}
@@ -353,7 +357,9 @@ export function ProjectDetail() {
                 >
                   <UserPlusIcon className="h-4 w-4 shrink-0 text-ink/50 dark:text-white/50" strokeWidth={3} aria-hidden />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-mono text-xs font-bold dark:text-white">{uid}</p>
+                    <p className="truncate font-display text-sm font-bold dark:text-white">
+                      {profiles[uid]?.name || uid}
+                    </p>
                   </div>
                   <Badge tone="plain">Pending</Badge>
                 </li>

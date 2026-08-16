@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangleIcon } from 'lucide-react';
 import { useStudyForge } from '../contexts/StudyForgeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Card, SectionHeading } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { ChipGroup, Select, TextInput, Toggle } from '../components/ui/Field';
@@ -10,6 +11,7 @@ import { Modal } from '../components/ui/Modal';
 
 export function Settings() {
   const { profile, setProfile, subjects, theme, toggleTheme, toast } = useStudyForge();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [reminders, setReminders] = useState({
     assignment: true,
@@ -43,7 +45,7 @@ export function Settings() {
               value={profile.name}
               onChange={(e) => setProfile({ ...profile, name: e.target.value })} />
             
-            <TextInput label="Email" type="email" defaultValue="rana.mehta@northgate.edu" />
+            <TextInput label="Email" type="email" value={user?.email || ''} readOnly className="opacity-70 cursor-not-allowed" />
             <Button variant="white" onClick={() => toast('Password reset link sent ✓')}>
               Change password
             </Button>
