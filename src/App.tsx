@@ -33,6 +33,7 @@ import { Settings } from './pages/Settings';
 import { ImportTimetable } from './pages/timetable/ImportTimetable';
 import { AnalyzeTimetable } from './pages/timetable/AnalyzeTimetable';
 import { ReviewTimetable } from './pages/timetable/ReviewTimetable';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
@@ -54,8 +55,9 @@ export function App() {
       <AuthProvider>
         <StudyForgeProvider>
           <QuickAddProvider>
-            <Routes>
-              <Route path="/" element={<Splash />} />
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<Splash />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               
@@ -79,7 +81,7 @@ export function App() {
                 <Route path="labs/:labId" element={<LabDetail />} />
                 <Route path="projects" element={<Projects />} />
                 <Route path="projects/:projectId" element={<ProjectDetail />} />
-                <Route path="notes" element={<Notes />} />
+                <Route path="notes" element={<ErrorBoundary><Notes /></ErrorBoundary>} />
                 <Route path="notes/:noteId" element={<NoteEditor />} />
                 <Route path="timetable" element={<Timetable />} />
                 <Route path="timetable/import" element={<ImportTimetable />} />
@@ -92,7 +94,8 @@ export function App() {
                 <Route path="settings" element={<Settings />} />
               </Route>
               <Route path="*" element={<Navigate to="/login" replace />} />
-            </Routes>
+              </Routes>
+            </ErrorBoundary>
           </QuickAddProvider>
         </StudyForgeProvider>
       </AuthProvider>

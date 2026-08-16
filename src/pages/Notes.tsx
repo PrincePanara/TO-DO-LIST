@@ -19,6 +19,7 @@ export function Notes() {
   const filtered = useMemo(
     () =>
     notes.filter((n) => {
+      if (!n) return false;
       if (tab !== 'ALL' && n.type !== tab) return false;
       const q = query.trim().toLowerCase();
       const tagsStr = Array.isArray(n.tags) ? n.tags.join(' ') : (typeof n.tags === 'string' ? n.tags : '');
@@ -28,7 +29,7 @@ export function Notes() {
     [notes, query, tab]
   );
 
-  const count = (t: NoteType) => notes.filter((n) => n.type === t).length;
+  const count = (t: NoteType) => notes.filter((n) => n && n.type === t).length;
 
   return (
     <div>
