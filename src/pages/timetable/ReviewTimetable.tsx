@@ -50,7 +50,7 @@ export function ReviewTimetable() {
       start: startHour,
       end: endHour,
       room: '',
-      kind: 'Theory'
+      kind: 'THEORY'
     });
   };
 
@@ -212,8 +212,8 @@ export function ReviewTimetable() {
                 <Select
                   label="Type"
                   value={editingSlot.kind}
-                  onChange={(e) => setEditingSlot({ ...editingSlot, kind: e.target.value as 'Theory' | 'Lab' })}
-                  options={[{ value: 'Theory', label: 'Theory' }, { value: 'Lab', label: 'Lab' }]}
+                  onChange={(e) => setEditingSlot({ ...editingSlot, kind: e.target.value as 'THEORY' | 'LAB' })}
+                  options={[{ value: 'THEORY', label: 'THEORY' }, { value: 'LAB', label: 'LAB' }]}
                 />
                 <TextInput
                   label="Room"

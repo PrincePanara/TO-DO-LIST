@@ -31,6 +31,7 @@ export type QuickAddKind =
 
 interface QuickAddOptions {
   subjectId?: string;
+  projectId?: string;
   day?: ClassSlot['day'];
   editTask?: Task;
   editAssignment?: Assignment;
@@ -82,9 +83,14 @@ export function QuickAddProvider({ children }: {children: React.ReactNode;}) {
   return (
     <QuickAddContext.Provider value={value}>
       {children}
-      {kind === 'task' &&
-      <TaskForm open onClose={close} editing={options.editTask} presetSubjectId={options.subjectId} />
-      }
+      {kind === 'task' && (
+        <TaskForm
+          open={true}
+          onClose={close}
+          editing={options.editTask}
+          presetSubjectId={options.subjectId}
+          presetProjectId={options.projectId} />
+      )}
       {kind === 'assignment' &&
       <AssignmentForm
         open

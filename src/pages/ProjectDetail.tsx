@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ExternalLinkIcon, PlusIcon, SendIcon, TrashIcon, UserCheckIcon, UserPlusIcon, UsersIcon, XIcon } from 'lucide-react';
-import { useStudyForge } from '../contexts/StudyForgeContext';
+import { ExternalLinkIcon, PlusIcon, SendIcon, TrashIcon, UserCheckIcon, UserPlusIcon, UsersIcon, XIcon, ListTodoIcon } from 'lucide-react';
+import { useStudyForge, useProjectTasks } from '../contexts/StudyForgeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuickAdd } from '../contexts/QuickAdd';
 import { Card, SectionHeading } from '../components/ui/Card';
@@ -10,6 +10,7 @@ import { Badge, StatusBadge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/Progress';
 import { EmptyState } from '../components/ui/States';
 import { PageHeader } from '../components/ui/PageHeader';
+import { TaskCard } from '../components/tasks/TaskCard';
 import { dueLabel, shortDate } from '../utils/date';
 import { projectProgress } from '../utils/progress';
 import type { ProjectStage } from '../types';
@@ -30,6 +31,7 @@ export function ProjectDetail() {
   const { user } = useAuth();
   const { open } = useQuickAdd();
   const navigate = useNavigate();
+  const projectTasks = useProjectTasks(projectId);
 
   const [inviteUid, setInviteUid] = useState('');
   const [inviting, setInviting] = useState(false);
@@ -157,14 +159,15 @@ export function ProjectDetail() {
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
-        <section aria-label="Milestones">
-          <SectionHeading
-            title="Milestones"
-            action={
-            <Button size="sm" variant="ink" onClick={() => open('task', { subjectId: project.subjectId })}>
-                <PlusIcon className="h-4 w-4" strokeWidth={3} aria-hidden /> Generate task
-              </Button>
-            } />
+        <div className="space-y-6">
+          <section aria-label="Milestones">
+            <SectionHeading
+              title="Milestones"
+              action={
+              <Button size="sm" variant="ink" onClick={() => open('task', { projectId: project.id, subjectId: project.subjectId })}>
+                  <PlusIcon className="h-4 w-4" strokeWidth={3} aria-hidden /> Generate task
+                </Button>
+              } />
           
           <ul className="space-y-4">
             {project.milestones.map((m, i) =>
@@ -213,19 +216,45 @@ export function ProjectDetail() {
                     
                       {m.status === 'COMPLETED' ? 'Completed ✓' : 'Mark complete'}
                     </Button>
-                    <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => open('task', { subjectId: project.subjectId })}>
-                    
-                      Create task
-                    </Button>
-                  </div>
-                </Card>
-              </li>
+                      <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => open('task', { projectId: project.id, subjectId: project.subjectId })}>
+                      
+                        Create task
+                      </Button>
+                    </div>
+                  </Card>
+                </li>
+              )}
+            </ul>
+          </section>
+
+          <section aria-label="Project Tasks" className="mt-8">
+            <SectionHeading
+              title="Project Tasks"
+              hint="Tasks specifically scoped to this project"
+              action={
+                <Button size="sm" variant="ink" onClick={() => open('task', { projectId: project.id, subjectId: project.subjectId })}>
+                  <PlusIcon className="h-4 w-4" strokeWidth={3} aria-hidden /> Create task
+                </Button>
+              }
+            />
+            {projectTasks.length === 0 ? (
+              <EmptyState
+                icon={<ListTodoIcon className="h-6 w-6 text-ink dark:text-white" strokeWidth={2.5} aria-hidden />}
+                title="No project tasks"
+                subtitle="Create a task to track specific deliverables for this project."
+              />
+            ) : (
+              <ul className="space-y-3">
+                {projectTasks.sort((a, b) => a.dueDate.localeCompare(b.dueDate)).map(t => (
+                  <TaskCard key={t.id} task={t} />
+                ))}
+              </ul>
             )}
-          </ul>
-        </section>
+          </section>
+        </div>
 
         <aside className="space-y-6">
           {/* ── Team Members Panel ── */}

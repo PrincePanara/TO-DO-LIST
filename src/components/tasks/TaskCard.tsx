@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckIcon, ClockIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import type { Task } from '../../types';
 import { useStudyForge } from '../../contexts/StudyForgeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useQuickAdd } from '../../contexts/QuickAdd';
 import { Card } from '../ui/Card';
 import { Badge, PriorityBadge, StatusBadge } from '../ui/Badge';
@@ -19,9 +20,11 @@ const categoryLabel: Record<Task['category'], string> = {
 };
 
 export function TaskCard({ task, compact = false }: {task: Task;compact?: boolean;}) {
-  const { subject, toggleTask, removeTask, toast } = useStudyForge();
+  const { subject, projects, toggleTask, removeTask, toast } = useStudyForge();
+  const { user } = useAuth();
   const { open } = useQuickAdd();
   const s = subject(task.subjectId);
+  const p = task.projectId ? projects.find(proj => proj.id === task.projectId) : null;
   const done = task.status === 'COMPLETED';
   const overdue = !done && isOverdue(task.dueDate);
   const progress = itemProgress(task);
@@ -56,8 +59,14 @@ export function TaskCard({ task, compact = false }: {task: Task;compact?: boolea
             {task.title}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
+            {p && <Badge tone="yellow">{p.name}</Badge>}
             {s && <Badge tone="purple">{s.name}</Badge>}
             <Badge>{categoryLabel[task.category]}</Badge>
+            {task.assigneeId && (
+              <span className="font-display text-[10px] uppercase font-bold tracking-wider text-ink/70 dark:text-white/70">
+                👤 {task.assigneeId === user?.uid ? 'You' : task.assigneeId}
+              </span>
+            )}
             <span
               className={`inline-flex items-center gap-1 font-display text-[11px] font-bold uppercase tracking-[0.1em] ${
               overdue ? 'text-danger' : 'muted'}`

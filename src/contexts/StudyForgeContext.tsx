@@ -28,7 +28,10 @@ import {
   deleteSharedProject,
   sendNotificationToUser,
   getSharedProject,
-  updateUserProfile
+  updateUserProfile,
+  subscribeToProjectTasks,
+  upsertProjectTask,
+  deleteProjectTask
 } from '../firebase/db';
 
 export type Theme = 'light' | 'dark';
@@ -108,6 +111,7 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
   const [profile, setProfileState] = useState<StudentProfile>(emptyProfile);
   const [subjects, setSubjectsState] = useState<Subject[]>([]);
   const [tasks, setTasksState] = useState<Task[]>([]);
+  const [projectTasks, setProjectTasksState] = useState<Task[]>([]);
   const [assignments, setAssignmentsState] = useState<Assignment[]>([]);
   const [labs, setLabsState] = useState<LabWork[]>([]);
   const [projects, setProjectsState] = useState<Project[]>([]);
@@ -130,6 +134,7 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
       setProfileState(emptyProfile);
       setSubjectsState([]);
       setTasksState([]);
+      setProjectTasksState([]);
       setAssignmentsState([]);
       setLabsState([]);
       setProjectsState([]);
@@ -173,6 +178,17 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
     };
   }, [user]);
 
+  // Subscribe to project tasks whenever the user's projects change
+  useEffect(() => {
+    if (!user || projects.length === 0) {
+      setProjectTasksState([]);
+      return;
+    }
+    const projectIds = projects.map(p => p.id);
+    const unsub = subscribeToProjectTasks<Task>(projectIds, setProjectTasksState);
+    return () => unsub();
+  }, [user, projects]);
+
   const toast = useCallback((message: string, tone: Toast['tone'] = 'success') => {
     const id = newId();
     setToasts((prev) => [...prev, { id, message, tone }]);
@@ -197,7 +213,7 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
     () => ({
       profile,
       subjects,
-      tasks,
+      tasks: [...tasks, ...projectTasks.filter(t => t.assigneeId === user?.uid)],
       assignments,
       labs,
       projects,
@@ -225,20 +241,38 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
         firestoreWrite(() => deleteUserDoc(user!.uid, 'subjects', id));
       },
       upsertTask: (t: Task) => {
-        setTasksState(prev => replaceOrAppend(prev, t));
-        firestoreWrite(() => upsertUserDoc(user!.uid, 'tasks', t));
+        if (t.projectId) {
+          setProjectTasksState(prev => replaceOrAppend(prev, t));
+          firestoreWrite(() => upsertProjectTask(t));
+        } else {
+          setTasksState(prev => replaceOrAppend(prev, t));
+          firestoreWrite(() => upsertUserDoc(user!.uid, 'tasks', t));
+        }
       },
       toggleTask: (id: string) => {
+        const pTask = projectTasks.find(t => t.id === id);
+        if (pTask) {
+          const updated = { ...pTask, status: (pTask.status === 'COMPLETED' ? 'IN_PROGRESS' : 'COMPLETED') as typeof pTask.status };
+          setProjectTasksState(prev => replaceOrAppend(prev, updated));
+          firestoreWrite(() => upsertProjectTask(updated));
+          return;
+        }
+        
         const task = tasks.find(t => t.id === id);
         if (task) {
-          const updated = { ...task, status: task.status === 'COMPLETED' ? 'IN_PROGRESS' : 'COMPLETED' as const };
+          const updated = { ...task, status: (task.status === 'COMPLETED' ? 'IN_PROGRESS' : 'COMPLETED') as typeof task.status };
           setTasksState(prev => replaceOrAppend(prev, updated));
           firestoreWrite(() => upsertUserDoc(user!.uid, 'tasks', updated));
         }
       },
       removeTask: (id: string) => {
-        setTasksState(prev => prev.filter(t => t.id !== id));
-        firestoreWrite(() => deleteUserDoc(user!.uid, 'tasks', id));
+        if (projectTasks.some(t => t.id === id)) {
+          setProjectTasksState(prev => prev.filter(t => t.id !== id));
+          firestoreWrite(() => deleteProjectTask(id));
+        } else {
+          setTasksState(prev => prev.filter(t => t.id !== id));
+          firestoreWrite(() => deleteUserDoc(user!.uid, 'tasks', id));
+        }
       },
       upsertAssignment: (a: Assignment) => {
         setAssignmentsState(prev => replaceOrAppend(prev, a));
@@ -390,6 +424,7 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
     profile,
     subjects,
     tasks,
+    projectTasks,
     assignments,
     labs,
     projects,
@@ -408,7 +443,22 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
 }
 
 export function useStudyForge() {
-  const ctx = useContext(StudyForgeContext);
-  if (!ctx) throw new Error('useStudyForge must be used inside StudyForgeProvider');
-  return ctx;
+  const context = useContext(StudyForgeContext);
+  if (!context) {
+    throw new Error('useStudyForge must be used within a StudyForgeProvider');
+  }
+  return context;
+}
+
+// Special hook just for ProjectDetail to get ALL tasks for a specific project
+export function useProjectTasks(projectId: string) {
+  const { user } = useAuth();
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  useEffect(() => {
+    if (!user || !projectId) return;
+    return subscribeToProjectTasks<Task>([projectId], setTasks);
+  }, [user, projectId]);
+
+  return tasks;
 }

@@ -69,11 +69,12 @@ export async function parsePdfTimetable(file: File, defaultSubjectId: string): P
       classes.push({
         id: newId(),
         subjectId: defaultSubjectId,
+        teacher: '',
         day: currentDay,
         start: currentStart,
         end: currentEnd,
         room: '',
-        kind: isLab ? 'Lab' : 'Theory'
+        kind: isLab ? 'LAB' : 'THEORY'
       });
       // Advance time slightly to avoid complete overlap if multiple subjects found
       let startHour = parseInt(currentStart.split(':')[0]);

@@ -140,3 +140,40 @@ export async function getSharedProject(projectId: string) {
   const snap = await getDoc(docRef);
   return snap.exists() ? snap.data() : null;
 }
+
+/**
+ * Root-level Project Tasks
+ */
+export async function upsertProjectTask(data: { id: string; [key: string]: any }) {
+  const docRef = doc(db, 'projectTasks', data.id);
+  await setDoc(docRef, {
+    ...data,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+export async function deleteProjectTask(docId: string) {
+  const docRef = doc(db, 'projectTasks', docId);
+  await deleteDoc(docRef);
+}
+
+export function subscribeToProjectTasks<T>(projectIds: string[], callback: (data: T[]) => void) {
+  if (projectIds.length === 0) {
+    callback([]);
+    return () => {};
+  }
+  
+  // Firestore `in` query is limited to 30 values, but typical use cases won't exceed this.
+  // Chunking would be needed for > 30 projects.
+  const q = query(
+    collection(db, 'projectTasks'),
+    where('projectId', 'in', projectIds.slice(0, 30))
+  );
+  
+  return onSnapshot(q, (snapshot) => {
+    const items = snapshot.docs.map(doc => doc.data() as T);
+    callback(items);
+  }, (error) => {
+    console.error(`Error subscribing to project tasks:`, error);
+  });
+}

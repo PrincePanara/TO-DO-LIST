@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ChecklistItem, Priority, Task, TaskCategory } from '../../types';
 import { newId, useStudyForge } from '../../contexts/StudyForgeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { ChipGroup, Select, TextArea, TextInput, Toggle } from '../ui/Field';
@@ -26,14 +27,11 @@ export function TaskForm({
   open,
   onClose,
   editing,
-  presetSubjectId
-
-
-
-
-
-}: {open: boolean;onClose: () => void;editing?: Task;presetSubjectId?: string;}) {
-  const { subjects, upsertTask, toast } = useStudyForge();
+  presetSubjectId,
+  presetProjectId
+}: {open: boolean;onClose: () => void;editing?: Task;presetSubjectId?: string; presetProjectId?: string;}) {
+  const { subjects, projects, upsertTask, toast } = useStudyForge();
+  const { user } = useAuth();
   const [title, setTitle] = useState(editing?.title ?? '');
   const [subjectId, setSubjectId] = useState(editing?.subjectId ?? presetSubjectId ?? '');
   const [category, setCategory] = useState<TaskCategory>(editing?.category ?? 'STUDY');
@@ -44,8 +42,14 @@ export function TaskForm({
   const [hours, setHours] = useState(String(editing?.estimatedHours ?? 1));
   const [checklist, setChecklist] = useState<ChecklistItem[]>(editing?.checklist ?? []);
   const [reminder, setReminder] = useState(editing?.reminder ?? true);
+  const [projectId, setProjectId] = useState(editing?.projectId ?? presetProjectId ?? '');
+  const [assigneeId, setAssigneeId] = useState(editing?.assigneeId ?? '');
   const [attachments, setAttachments] = useState<string[]>([]);
   const [error, setError] = useState('');
+
+  // If a project is selected, fetch its members to populate the assignee dropdown
+  const selectedProject = projects.find(p => p.id === projectId);
+  const projectMembers = selectedProject ? [selectedProject.ownerId, ...selectedProject.members] : [];
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,8 +61,10 @@ export function TaskForm({
       id: editing?.id ?? newId(),
       title: title.trim(),
       subjectId: subjectId || null,
+      projectId: projectId || null,
+      assigneeId: assigneeId || null,
       category,
-      description,
+      description: description.trim(),
       dueDate,
       dueTime,
       priority,
@@ -117,6 +123,33 @@ export function TaskForm({
             options={categories} />
           
         </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Select 
+            label="Subject (Optional)" 
+            value={subjectId} 
+            onChange={(e) => setSubjectId(e.target.value)}
+            options={[{value: '', label: 'General'}, ...subjects.map(s => ({value: s.id, label: s.name}))]} 
+          />
+
+          <Select 
+            label="Project (Optional)" 
+            value={projectId} 
+            onChange={(e) => setProjectId(e.target.value)} 
+            disabled={!!presetProjectId}
+            options={[{value: '', label: 'None'}, ...projects.map(p => ({value: p.id, label: p.name}))]} 
+          />
+        </div>
+
+        {projectId && (
+          <Select 
+            label="Assign to Member (Optional)" 
+            value={assigneeId} 
+            onChange={(e) => setAssigneeId(e.target.value)}
+            options={[{value: '', label: 'Unassigned'}, ...projectMembers.map(uid => ({value: uid, label: uid === user?.uid ? 'You' : uid}))]} 
+          />
+        )}
+
         <TextArea
           label="Description"
           placeholder="What exactly needs to be done?"

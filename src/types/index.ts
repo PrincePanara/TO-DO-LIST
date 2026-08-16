@@ -43,6 +43,8 @@ export interface Task {
   id: string;
   title: string;
   subjectId: string | null;
+  projectId?: string | null;
+  assigneeId?: string | null;
   category: TaskCategory;
   description: string;
   dueDate: string;
