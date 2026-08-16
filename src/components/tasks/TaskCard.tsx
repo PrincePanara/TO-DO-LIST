@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckIcon, ClockIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import type { Task } from '../../types';
-import { useStudyForge } from '../../contexts/StudyForgeContext';
+import { useStudyForge, useUserProfiles } from '../../contexts/StudyForgeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useQuickAdd } from '../../contexts/QuickAdd';
 import { Card } from '../ui/Card';
@@ -28,6 +28,8 @@ export function TaskCard({ task, compact = false }: {task: Task;compact?: boolea
   const done = task.status === 'COMPLETED';
   const overdue = !done && isOverdue(task.dueDate);
   const progress = itemProgress(task);
+  const profiles = useUserProfiles(task.assigneeId ? [task.assigneeId] : []);
+  const assigneeName = task.assigneeId ? (profiles[task.assigneeId]?.name || profiles[task.assigneeId]?.email || task.assigneeId) : null;
 
   return (
     <Card
@@ -64,7 +66,7 @@ export function TaskCard({ task, compact = false }: {task: Task;compact?: boolea
             <Badge>{categoryLabel[task.category]}</Badge>
             {task.assigneeId && (
               <span className="font-display text-[10px] uppercase font-bold tracking-wider text-ink/70 dark:text-white/70">
-                👤 {task.assigneeId === user?.uid ? 'You' : task.assigneeId}
+                👤 {task.assigneeId === user?.uid ? 'You' : assigneeName}
               </span>
             )}
             <span

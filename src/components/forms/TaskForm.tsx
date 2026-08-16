@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { ChecklistItem, Priority, Task, TaskCategory } from '../../types';
-import { newId, useStudyForge } from '../../contexts/StudyForgeContext';
+import { newId, useStudyForge, useUserProfiles } from '../../contexts/StudyForgeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -49,7 +49,8 @@ export function TaskForm({
 
   // If a project is selected, fetch its members to populate the assignee dropdown
   const selectedProject = projects.find(p => p.id === projectId);
-  const projectMembers = selectedProject ? [selectedProject.ownerId, ...selectedProject.members] : [];
+  const projectMembers = selectedProject ? [selectedProject.ownerId, ...(selectedProject.members ?? [])] : [];
+  const profiles = useUserProfiles(projectMembers);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,7 +147,10 @@ export function TaskForm({
             label="Assign to Member (Optional)" 
             value={assigneeId} 
             onChange={(e) => setAssigneeId(e.target.value)}
-            options={[{value: '', label: 'Unassigned'}, ...projectMembers.map(uid => ({value: uid, label: uid === user?.uid ? 'You' : uid}))]} 
+            options={[{value: '', label: 'Unassigned'}, ...projectMembers.map(uid => ({
+              value: uid, 
+              label: uid === user?.uid ? 'You' : (profiles[uid]?.name || profiles[uid]?.email || uid)
+            }))]} 
           />
         )}
 
