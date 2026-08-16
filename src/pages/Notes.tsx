@@ -21,7 +21,8 @@ export function Notes() {
     notes.filter((n) => {
       if (tab !== 'ALL' && n.type !== tab) return false;
       const q = query.trim().toLowerCase();
-      if (q && !`${n.title} ${n.content} ${n.tags.join(' ')}`.toLowerCase().includes(q)) return false;
+      const tagsStr = Array.isArray(n.tags) ? n.tags.join(' ') : (typeof n.tags === 'string' ? n.tags : '');
+      if (q && !`${n.title || ''} ${n.content || ''} ${tagsStr}`.toLowerCase().includes(q)) return false;
       return true;
     }),
     [notes, query, tab]

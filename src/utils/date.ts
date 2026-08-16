@@ -13,6 +13,7 @@ export function isoOffset(days: number): string {
 }
 
 export function toDate(iso: string): Date {
+  if (!iso) return new Date();
   return startOfDay(parseISO(iso));
 }
 
@@ -21,6 +22,7 @@ export function isToday(iso: string): boolean {
 }
 
 export function daysUntil(iso: string): number {
+  if (!iso) return 0;
   return differenceInCalendarDays(toDate(iso), startOfDay(new Date()));
 }
 
@@ -29,7 +31,8 @@ export function isOverdue(iso: string): boolean {
 }
 
 /** "TODAY" / "TOMORROW" / "18 AUG" / "2 DAYS AGO" */
-export function dueLabel(iso: string): string {
+export function dueLabel(iso?: string | null): string {
+  if (!iso) return 'N/A';
   const diff = daysUntil(iso);
   if (diff === 0) return 'TODAY';
   if (diff === 1) return 'TOMORROW';

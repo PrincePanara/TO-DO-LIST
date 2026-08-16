@@ -17,7 +17,7 @@ const typeTone: Record<Note['type'], BadgeTone> = {
 export function NoteCard({ note }: {note: Note;}) {
   const { subject } = useStudyForge();
   const s = subject(note.subjectId);
-  const preview = note.content.
+  const preview = (typeof note.content === 'string' ? note.content : '').
   replace(/[#>*`\-]/g, '').
   split('\n').
   filter(Boolean).
@@ -38,7 +38,7 @@ export function NoteCard({ note }: {note: Note;}) {
       </p>
       <p className="muted mt-3 flex-1 text-sm">{preview || 'Empty note — open it to start writing.'}</p>
 
-      {note.tags.length > 0 &&
+      {Array.isArray(note.tags) && note.tags.length > 0 &&
       <p className="mt-4 font-display text-[11px] font-bold uppercase tracking-[0.14em] text-brand">
           {note.tags.join(' • ')}
         </p>
