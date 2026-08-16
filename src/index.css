@@ -1,0 +1,128 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+body {
+  background-color: #f4f1ea;
+  color: #111111;
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.dark body {
+  background-color: #17161a;
+  color: #ffffff;
+}
+@layer components {
+  /* Core neo-brutalist surface. Dark mode is centralized on these classes. */
+  .surface {
+    @apply bg-white border-3 border-ink;
+  }
+  .dark .surface {
+    background-color: #232228;
+    border-color: #ffffff;
+    color: #ffffff;
+  }
+  .dark .surface-shadow {
+    box-shadow: 6px 6px 0px #ffffff;
+  }
+  .surface-shadow {
+    box-shadow: 6px 6px 0px #111111;
+  }
+  .dark .muted {
+    color: #b7b4c2;
+  }
+  .muted {
+    @apply text-ink/60;
+  }
+  .brut-input {
+    @apply w-full bg-white border-3 border-ink px-4 py-3 font-sans text-base text-ink
+      placeholder:text-ink/40 focus:outline-none focus:ring-0 focus:shadow-brut-sm
+      transition-shadow duration-150 ease-brut;
+  }
+  .dark .brut-input {
+    background-color: #1f1e24;
+    border-color: #ffffff;
+    color: #ffffff;
+  }
+  .brut-label {
+    @apply block font-display text-xs font-bold uppercase tracking-[0.14em] mb-2;
+  }
+  .press {
+    transition-property: transform, box-shadow, background-color, color;
+    transition-duration: 120ms;
+    transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .press:hover {
+    transform: translate(-1px, -1px);
+  }
+  .press:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 #111111 !important;
+  }
+  .focus-brut {
+    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/50 focus-visible:ring-offset-0;
+  }
+  .grid-paper {
+    background-image: linear-gradient(#11111112 1px, transparent 1px),
+      linear-gradient(90deg, #11111112 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+}
+/* In dark mode every hard shadow flips to white so it stays visible. */
+.dark .shadow-brut-xs {
+  box-shadow: 2px 2px 0px #ffffff;
+}
+.dark .shadow-brut-sm {
+  box-shadow: 3px 3px 0px #ffffff;
+}
+.dark .shadow-brut {
+  box-shadow: 6px 6px 0px #ffffff;
+}
+.dark .shadow-brut-lg {
+  box-shadow: 10px 10px 0px #ffffff;
+}
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #111111;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+@keyframes scanline {
+  0% {
+    top: 4%;
+  }
+  100% {
+    top: 92%;
+  }
+}
+.scanline {
+  animation: scanline 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
