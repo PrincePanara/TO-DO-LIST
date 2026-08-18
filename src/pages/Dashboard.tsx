@@ -49,10 +49,7 @@ export function Dashboard() {
         <h1 className="font-display text-3xl font-bold uppercase leading-none tracking-tight sm:text-4xl lg:text-5xl">
           Your Qubeso command center
         </h1>
-        <p className="muted mt-3 max-w-2xl text-sm sm:text-base">
-          One place for your entire semester — {subjects.length} subjects, every deadline, and what
-          needs doing next.
-        </p>
+
       </div>
 
       <ul className="grid grid-cols-2 gap-4 xl:grid-cols-4">

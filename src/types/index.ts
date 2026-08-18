@@ -135,6 +135,8 @@ export interface Note {
   tags: string[];
   content: string;
   updatedAt: string;
+  shared?: boolean;
+  collaborators?: string[];
 }
 
 export interface ClassSlot {

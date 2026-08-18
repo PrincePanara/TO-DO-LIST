@@ -18,12 +18,12 @@ export function NoteCard({ note }: {note: Note;}) {
   const { subject } = useStudyForge();
   const s = subject(note.subjectId);
   const preview = (typeof note.content === 'string' ? note.content : '').
-  replace(/[#>*`\-]/g, '').
-  split('\n').
-  filter(Boolean).
-  slice(1, 4).
-  join(' ').
-  slice(0, 160);
+    replace(/[#>*`\-]/g, '').
+    split('\n').
+    filter(Boolean).
+    slice(1, 4).
+    join(' ').
+    slice(0, 160);
 
   return (
     <Card as="li" className="flex h-full flex-col p-5">
