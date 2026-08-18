@@ -206,3 +206,41 @@ export function subscribeToProjectTasks<T>(projectIds: string[], callback: (data
     console.error(`Error subscribing to project tasks:`, error);
   });
 }
+
+/**
+ * Root-level Shared Notes
+ */
+export async function upsertSharedNote(data: { id: string; [key: string]: any }) {
+  const docRef = doc(db, 'notes', data.id);
+  await setDoc(docRef, {
+    ...data,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+export async function deleteSharedNote(docId: string) {
+  const docRef = doc(db, 'notes', docId);
+  await deleteDoc(docRef);
+}
+
+export function subscribeToSharedNotes<T>(uid: string, callback: (data: T[]) => void) {
+  const q = query(
+    collection(db, 'notes'),
+    or(
+      where('ownerId', '==', uid),
+      where('collaborators', 'array-contains', uid)
+    )
+  );
+  return onSnapshot(q, (snapshot) => {
+    const items = snapshot.docs.map(doc => doc.data() as T);
+    callback(items);
+  }, (error) => {
+    console.error(`Error subscribing to shared notes:`, error);
+  });
+}
+
+export async function getSharedNote(noteId: string) {
+  const docRef = doc(db, 'notes', noteId);
+  const snap = await getDoc(docRef);
+  return snap.exists() ? snap.data() : null;
+}

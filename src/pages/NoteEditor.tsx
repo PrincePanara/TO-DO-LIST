@@ -42,7 +42,7 @@ const tools: {label: string;icon: React.ElementType;wrap: [string, string];}[] =
 
 export function NoteEditor() {
   const { noteId = '' } = useParams();
-  const { notes, subjects, upsertNote, removeNote, toast } = useStudyForge();
+  const { notes, subjects, upsertNote, removeNote, toast, inviteUserToNote } = useStudyForge();
   const navigate = useNavigate();
   const note = notes.find((n) => n.id === noteId);
   const areaRef = useRef<HTMLTextAreaElement>(null);
@@ -98,13 +98,9 @@ export function NoteEditor() {
     setTablePopup(false);
   };
 
-  const handleInvite = () => {
+  const handleInvite = async () => {
     if (!draft || !inviteUid.trim()) return;
-    const current = draft.collaborators || [];
-    if (!current.includes(inviteUid.trim())) {
-      setDraft({ ...draft, shared: true, collaborators: [...current, inviteUid.trim()] });
-      toast('Collaborator invited!', 'success');
-    }
+    await inviteUserToNote(draft.id, inviteUid.trim(), draft.title);
     setInviteUid('');
   };
 
@@ -131,7 +127,8 @@ export function NoteEditor() {
     }
     setSaved(false);
     const id = window.setTimeout(() => {
-      upsertNote({ ...draft, updatedAt: isoOffset(0) });
+      // Merge draft with the latest remote note to avoid overwriting collaborators/pendingInvites
+      upsertNote({ ...note, ...draft, updatedAt: isoOffset(0) });
       setSaved(true);
     }, 700);
     return () => window.clearTimeout(id);
@@ -196,12 +193,12 @@ export function NoteEditor() {
         actions={
         <div className="flex items-center gap-2">
             <Button
-            variant="secondary"
+            variant="white"
             onClick={handleDownloadPdf}>
               <DownloadIcon className="h-4 w-4" strokeWidth={3} aria-hidden /> Download PDF
             </Button>
             <Button
-            variant={draft.shared ? "primary" : "secondary"}
+            variant={draft.shared ? "primary" : "white"}
             onClick={() => setSharePopup(true)}>
               <ShareIcon className="h-4 w-4" strokeWidth={3} aria-hidden /> {draft.shared ? 'Shared' : 'Collaborate'}
             </Button>
@@ -389,8 +386,21 @@ export function NoteEditor() {
               </div>
             )}
             
+            {note.pendingInvites && note.pendingInvites.length > 0 && (
+              <div className="mb-4">
+                <span className="block text-xs font-bold mb-2">Pending Invites:</span>
+                <ul className="space-y-2">
+                  {note.pendingInvites.map(uid => (
+                    <li key={uid} className="flex items-center justify-between bg-sun/10 p-2 text-sm border-2 border-ink/50 dark:border-white/50">
+                      <span className="font-mono text-ink/70 dark:text-white/70">{uid} (Pending)</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
             <div className="flex justify-end pt-4 border-t-2 border-ink dark:border-white">
-              <Button variant="secondary" onClick={() => setSharePopup(false)}>Close</Button>
+              <Button variant="white" onClick={() => setSharePopup(false)}>Close</Button>
             </div>
           </Card>
         </div>

@@ -136,7 +136,9 @@ export interface Note {
   content: string;
   updatedAt: string;
   shared?: boolean;
+  ownerId?: string;
   collaborators?: string[];
+  pendingInvites?: string[];
 }
 
 export interface ClassSlot {
@@ -152,7 +154,7 @@ export interface ClassSlot {
 
 export interface AppNotification {
   id: string;
-  kind: 'urgent' | 'warn' | 'info' | 'success' | 'project_invite';
+  kind: 'urgent' | 'warn' | 'info' | 'success' | 'project_invite' | 'note_invite';
   message: string;
   meta: string;
   createdAt: string;

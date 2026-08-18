@@ -32,7 +32,11 @@ import {
   subscribeToProjectTasks,
   upsertProjectTask,
   deleteProjectTask,
-  getProfilesByUids
+  getProfilesByUids,
+  subscribeToSharedNotes,
+  upsertSharedNote,
+  deleteSharedNote,
+  getSharedNote
 } from '../firebase/db';
 
 export type Theme = 'light' | 'dark';
@@ -90,6 +94,8 @@ interface StudyForgeActions {
   removeNotification: (id: string) => void;
   inviteUserToProject: (projectId: string, targetUid: string, projectName: string) => Promise<void>;
   respondToInvite: (notificationId: string, projectId: string, accept: boolean) => Promise<void>;
+  inviteUserToNote: (noteId: string, targetUid: string, noteName: string) => Promise<void>;
+  respondToNoteInvite: (notificationId: string, noteId: string, accept: boolean) => Promise<void>;
   toggleTheme: () => void;
   setOnboarded: (v: boolean) => void;
   toast: (message: string, tone?: Toast['tone']) => void;
@@ -162,7 +168,7 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
     const unsubAssignments = subscribeToUserCollection<Assignment>(user.uid, 'assignments', setAssignmentsState);
     const unsubLabs = subscribeToUserCollection<LabWork>(user.uid, 'labs', setLabsState);
     const unsubProjects = subscribeToSharedProjects<Project>(user.uid, setProjectsState);
-    const unsubNotes = subscribeToUserCollection<Note>(user.uid, 'notes', setNotesState);
+    const unsubNotes = subscribeToSharedNotes<Note>(user.uid, setNotesState);
     const unsubTimetable = subscribeToUserCollection<ClassSlot>(user.uid, 'timetable', setTimetableState);
     const unsubNotifications = subscribeToUserCollection<AppNotification>(user.uid, 'notifications', setNotificationsState);
 
@@ -301,11 +307,11 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
       },
       upsertNote: (n: Note) => {
         setNotesState(prev => replaceOrAppend(prev, n));
-        firestoreWrite(() => upsertUserDoc(user!.uid, 'notes', n));
+        firestoreWrite(() => upsertSharedNote(n));
       },
       removeNote: (id: string) => {
         setNotesState(prev => prev.filter(n => n.id !== id));
-        firestoreWrite(() => deleteUserDoc(user!.uid, 'notes', id));
+        firestoreWrite(() => deleteSharedNote(id));
       },
       upsertClass: (c: ClassSlot) => {
         setTimetableState(prev => replaceOrAppend(prev, c));
@@ -410,6 +416,76 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
         } catch (e) {
           console.error(e);
           toast('Failed to respond to invitation', 'error');
+        }
+      },
+      inviteUserToNote: async (noteId: string, targetUid: string, noteName: string) => {
+        if (!user) return;
+        if (targetUid === user.uid) {
+          toast('You cannot invite yourself', 'error');
+          return;
+        }
+        try {
+          const n = notes.find(n => n.id === noteId);
+          if (n) {
+            if (n.pendingInvites?.includes(targetUid) || n.collaborators?.includes(targetUid)) {
+              toast('This user already has a pending invite or is already a collaborator', 'error');
+              return;
+            }
+            const updatedNote = { 
+              ...n, 
+              pendingInvites: [...(n.pendingInvites ?? []), targetUid] 
+            };
+            await upsertSharedNote(updatedNote);
+            setNotesState(prev => replaceOrAppend(prev, updatedNote));
+          }
+          await sendNotificationToUser(targetUid, {
+            id: newId(),
+            kind: 'note_invite',
+            message: `You have been invited to collaborate on the note: ${noteName}`,
+            meta: noteId,
+            read: false,
+            createdAt: new Date().toISOString()
+          });
+          toast('Invitation sent successfully');
+        } catch (e) {
+          console.error(e);
+          toast('Failed to send note invitation', 'error');
+        }
+      },
+      respondToNoteInvite: async (notificationId: string, noteId: string, accept: boolean) => {
+        if (!user) return;
+        try {
+          if (accept) {
+            const noteData = await getSharedNote(noteId);
+            if (noteData) {
+              const n = noteData as import('../types').Note;
+              const alreadyMember = (n.collaborators ?? []).includes(user.uid);
+              if (!alreadyMember) {
+                const updatedNote = {
+                  ...n,
+                  collaborators: [...(n.collaborators ?? []), user.uid],
+                  pendingInvites: (n.pendingInvites ?? []).filter((uid: string) => uid !== user.uid)
+                };
+                await upsertSharedNote(updatedNote);
+                setNotesState(prev => replaceOrAppend(prev, updatedNote));
+              }
+            }
+          } else {
+            const noteData = await getSharedNote(noteId);
+            if (noteData) {
+              const updatedNote = {
+                ...(noteData as import('../types').Note),
+                pendingInvites: ((noteData as any).pendingInvites ?? []).filter((uid: string) => uid !== user.uid)
+              };
+              await upsertSharedNote(updatedNote);
+            }
+          }
+          setNotificationsState(prev => prev.filter(n => n.id !== notificationId));
+          await deleteUserDoc(user.uid, 'notifications', notificationId);
+          toast(accept ? 'Joined note successfully!' : 'Invitation declined');
+        } catch (e) {
+          console.error(e);
+          toast('Failed to respond to note invitation', 'error');
         }
       },
       toggleTheme: () => setTheme((t) => t === 'light' ? 'dark' : 'light'),

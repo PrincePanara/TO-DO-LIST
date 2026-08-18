@@ -11,6 +11,7 @@ import type {
   Task } from
 '../types';
 import { newId, useStudyForge } from './StudyForgeContext';
+import { useAuth } from './AuthContext';
 import { TaskForm } from '../components/forms/TaskForm';
 import { SubjectForm } from '../components/forms/SubjectForm';
 import { AssignmentForm } from '../components/forms/AssignmentForm';
@@ -49,6 +50,7 @@ const QuickAddContext = createContext<QuickAddValue | null>(null);
 
 export function QuickAddProvider({ children }: {children: React.ReactNode;}) {
   const { upsertNote, toast } = useStudyForge();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [kind, setKind] = useState<QuickAddKind | null>(null);
   const [options, setOptions] = useState<QuickAddOptions>({});
@@ -65,7 +67,9 @@ export function QuickAddProvider({ children }: {children: React.ReactNode;}) {
           type: 'LECTURE',
           tags: [],
           content: '',
-          updatedAt: isoOffset(0)
+          updatedAt: isoOffset(0),
+          ownerId: user?.uid ?? '',
+          pendingInvites: []
         };
         upsertNote(note);
         toast('Note created ✓');
@@ -75,7 +79,7 @@ export function QuickAddProvider({ children }: {children: React.ReactNode;}) {
       setOptions(opts);
       setKind(next);
     },
-    [navigate, toast, upsertNote]
+    [navigate, toast, upsertNote, user]
   );
 
   const value = useMemo(() => ({ open }), [open]);

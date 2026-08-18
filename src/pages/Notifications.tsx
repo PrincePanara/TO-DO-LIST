@@ -13,11 +13,12 @@ const kindStyles: Record<AppNotification['kind'], {dot: string;label: string;}> 
   warn: { dot: 'bg-sun', label: 'Due soon' },
   info: { dot: 'bg-brand', label: 'Update' },
   success: { dot: 'bg-ok', label: 'Completed' },
-  project_invite: { dot: 'bg-brand', label: 'Invite' }
+  project_invite: { dot: 'bg-brand', label: 'Invite' },
+  note_invite: { dot: 'bg-brand', label: 'Collab Invite' }
 };
 
 function NotificationRow({ n }: {n: AppNotification;}) {
-  const { markNotificationRead, removeNotification, toast } = useStudyForge();
+  const { markNotificationRead, removeNotification, respondToNoteInvite, toast } = useStudyForge();
   const style = kindStyles[n.kind];
 
   return (
@@ -35,6 +36,13 @@ function NotificationRow({ n }: {n: AppNotification;}) {
         <p className="muted mt-1 font-display text-[11px] font-bold uppercase tracking-[0.12em]">
           {style.label} • {n.meta} • {dueLabel(n.createdAt).toLowerCase()}
         </p>
+        
+        {n.kind === 'note_invite' && (
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" onClick={() => respondToNoteInvite(n.id, n.meta, true)}>Accept</Button>
+            <Button size="sm" variant="white" onClick={() => respondToNoteInvite(n.id, n.meta, false)}>Reject</Button>
+          </div>
+        )}
       </div>
       <div className="flex shrink-0 gap-2">
         {!n.read &&
