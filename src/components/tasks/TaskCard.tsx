@@ -52,9 +52,9 @@ export function TaskCard({ task, compact = false }: {task: Task;compact?: boolea
           {done && <CheckIcon className="h-4 w-4 text-ink" strokeWidth={4} aria-hidden />}
         </button>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 cursor-pointer group" onClick={() => open('task', { editTask: task })}>
           <p
-            className={`font-display text-base font-bold leading-tight ${
+            className={`font-display text-base font-bold leading-tight group-hover:underline ${
             done ? 'line-through' : ''}`
             }>
             
