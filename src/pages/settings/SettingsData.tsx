@@ -26,11 +26,11 @@ export function SettingsData() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader 
-        title="Data & Advanced" 
-        subtitle="Manage your backups, exports, and account deletion." 
-        backTo="/app/settings" 
-        backLabel="Settings" 
+      <PageHeader
+        title="Data & Advanced"
+
+        backTo="/app/settings"
+        backLabel="Settings"
       />
 
       <div className="space-y-6">
@@ -44,7 +44,7 @@ export function SettingsData() {
               <p className="muted text-sm">These actions cannot be undone.</p>
             </div>
           </div>
-          <div className="space-y-4">
+          <div className="flex flex-wrap gap-4">
             <Button variant="danger" className="w-full sm:w-auto" onClick={() => setShowResetModal(true)}>
               Factory reset workspace
             </Button>
