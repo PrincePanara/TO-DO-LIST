@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useStudyForge } from '../../contexts/StudyForgeContext';
-import { Card, SectionHeading } from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { AlertTriangleIcon } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 
 export function SettingsData() {
-  const { toast, factoryReset, deleteAccount } = useStudyForge();
-  const navigate = useNavigate();
+  const { factoryReset, deleteAccount } = useStudyForge();
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);

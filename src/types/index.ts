@@ -97,6 +97,7 @@ export interface LabWork {
   status: WorkStatus;
   checklist: ChecklistItem[];
   attachments: string[];
+  color?: SubjectColor;
 }
 
 export interface Milestone {

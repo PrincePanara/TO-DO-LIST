@@ -15,10 +15,19 @@ export function LabCard({ lab, showSubject = true }: {lab: LabWork;showSubject?:
   const progress = itemProgress(lab);
   const overdue = lab.status !== 'COMPLETED' && isOverdue(lab.submissionDate);
 
+  const bgColors: Record<string, string> = {
+    purple: 'bg-brand text-white',
+    yellow: 'bg-sun text-ink',
+    red: 'bg-danger text-white',
+    green: 'bg-ok text-ink',
+    white: 'bg-white text-ink'
+  };
+  const colorClass = bgColors[lab.color || 'purple'];
+
   return (
     <Card as="li" className="flex h-full flex-col p-5">
       <div className="flex items-start justify-between gap-3">
-        <span className="flex items-center gap-2 border-3 border-ink bg-brand px-2 py-0.5 font-display text-xs font-bold uppercase tracking-[0.12em] text-white dark:border-white">
+        <span className={`flex items-center gap-2 border-3 border-ink px-2 py-0.5 font-display text-xs font-bold uppercase tracking-[0.12em] dark:border-white ${colorClass}`}>
           <FlaskConicalIcon className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
           Lab {String(lab.number).padStart(2, '0')}
         </span>

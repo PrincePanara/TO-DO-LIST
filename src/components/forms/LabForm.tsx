@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { ChecklistItem, LabWork, VivaQuestion } from '../../types';
+import type { ChecklistItem, LabWork, VivaQuestion, SubjectColor } from '../../types';
 import { newId, useStudyForge } from '../../contexts/StudyForgeContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -17,6 +17,14 @@ const defaultChecklist = (): ChecklistItem[] =>
 'Prepare viva',
 'Submit'].
 map((label) => ({ id: newId(), label, done: false }));
+
+const colors: {value: SubjectColor;label: string;swatch: string;}[] = [
+  { value: 'purple', label: 'Purple', swatch: 'bg-brand' },
+  { value: 'yellow', label: 'Yellow', swatch: 'bg-sun' },
+  { value: 'red', label: 'Red', swatch: 'bg-danger' },
+  { value: 'green', label: 'Green', swatch: 'bg-ok' },
+  { value: 'white', label: 'White', swatch: 'bg-white' }
+];
 
 export function LabForm({
   open,
@@ -50,6 +58,7 @@ export function LabForm({
     editing?.checklist ?? defaultChecklist()
   );
   const [attachments, setAttachments] = useState<string[]>(editing?.attachments ?? []);
+  const [color, setColor] = useState<SubjectColor>(editing?.color ?? 'purple');
   const [error, setError] = useState('');
 
   const submit = (e: React.FormEvent) => {
@@ -74,7 +83,8 @@ export function LabForm({
       submissionDate,
       status: editing?.status ?? 'NOT_STARTED',
       checklist,
-      attachments
+      attachments,
+      color
     });
     toast(editing ? 'Lab work saved ✓' : 'Lab work created ✓');
     onClose();
@@ -219,6 +229,24 @@ export function LabForm({
             className="brut-input file:mr-3 file:border-3 file:border-ink file:bg-sun file:px-3 file:py-1 file:font-display file:text-xs file:font-bold file:uppercase" />
           
           {attachments.length > 0 && <p className="muted mt-2 text-xs">{attachments.join(', ')}</p>}
+        </div>
+        
+        <div>
+          <span className="brut-label">Card colour</span>
+          <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Card colour">
+            {colors.map((c) =>
+            <button
+              key={c.value}
+              type="button"
+              role="radio"
+              aria-checked={color === c.value}
+              aria-label={c.label}
+              onClick={() => setColor(c.value)}
+              className={`h-11 w-11 border-3 border-ink press focus-brut dark:border-white ${c.swatch} ${
+              color === c.value ? 'shadow-brut-sm ring-4 ring-ink/30' : ''}`
+              } />
+            )}
+          </div>
         </div>
       </form>
     </Modal>);
