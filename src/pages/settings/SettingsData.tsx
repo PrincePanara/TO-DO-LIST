@@ -34,21 +34,6 @@ export function SettingsData() {
       />
 
       <div className="space-y-6">
-        <Card className="p-6">
-          <SectionHeading title="Data Management" />
-          <div className="flex flex-wrap gap-3 mt-4">
-            <Button variant="white" onClick={() => navigate('/import')}>
-              Import Data
-            </Button>
-            <Button variant="white" onClick={() => toast('Export started ✓')}>
-              Export Data
-            </Button>
-            <Button variant="white" onClick={() => toast('Backup created ✓')}>
-              Backup Now
-            </Button>
-          </div>
-        </Card>
-
         <Card className="border-danger p-6">
           <div className="mb-4 flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center border-3 border-ink bg-danger text-white dark:border-white">
