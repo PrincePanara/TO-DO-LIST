@@ -96,6 +96,8 @@ interface StudyForgeActions {
   respondToInvite: (notificationId: string, projectId: string, accept: boolean) => Promise<void>;
   inviteUserToNote: (noteId: string, targetUid: string, noteName: string) => Promise<void>;
   respondToNoteInvite: (notificationId: string, noteId: string, accept: boolean) => Promise<void>;
+  factoryReset: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   toggleTheme: () => void;
   setOnboarded: (v: boolean) => void;
   toast: (message: string, tone?: Toast['tone']) => void;
@@ -486,6 +488,48 @@ export function StudyForgeProvider({ children }: {children: React.ReactNode;}) {
         } catch (e) {
           console.error(e);
           toast('Failed to respond to note invitation', 'error');
+        }
+      },
+      factoryReset: async () => {
+        if (!user) return;
+        try {
+          // In a real app with proper batching this would be done on the server,
+          // but for this mock we just clear the local state and individual docs if needed.
+          setSubjectsState([]);
+          setTasksState([]);
+          setProjectTasksState([]);
+          setAssignmentsState([]);
+          setLabsState([]);
+          setProjectsState(projects.filter(p => p.ownerId !== user.uid));
+          setNotesState([]);
+          setTimetableState([]);
+          setNotificationsState([]);
+          setProfileState(emptyProfile);
+          setOnboarded(false);
+          await updateUserProfile(user.uid, { ...emptyProfile, onboardedCompleted: false });
+          toast('Workspace has been reset to factory defaults', 'success');
+        } catch (e) {
+          console.error(e);
+          toast('Failed to reset workspace', 'error');
+        }
+      },
+      deleteAccount: async () => {
+        if (!user) return;
+        try {
+          toast('Account deletion request initiated...', 'info');
+          // Wait briefly so the user sees the toast before potentially redirecting
+          await new Promise(r => setTimeout(r, 1000));
+          // For security reasons, re-authentication is often required before delete().
+          // Calling delete() here will work if the user recently signed in.
+          await user.delete();
+          // The auth listener will pick this up and clear the user.
+        } catch (e: any) {
+          console.error(e);
+          if (e.code === 'auth/requires-recent-login') {
+            toast('Please log out and log back in before deleting your account.', 'error');
+          } else {
+            toast('Failed to delete account', 'error');
+          }
         }
       },
       toggleTheme: () => setTheme((t) => t === 'light' ? 'dark' : 'light'),
