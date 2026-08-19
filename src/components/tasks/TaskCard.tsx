@@ -4,6 +4,7 @@ import type { Task } from '../../types';
 import { useStudyForge, useUserProfiles } from '../../contexts/StudyForgeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useQuickAdd } from '../../contexts/QuickAdd';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '../ui/Card';
 import { Badge, PriorityBadge, StatusBadge } from '../ui/Badge';
 import { ProgressBar } from '../ui/Progress';
@@ -23,6 +24,7 @@ export function TaskCard({ task, compact = false }: {task: Task;compact?: boolea
   const { subject, projects, toggleTask, removeTask, toast } = useStudyForge();
   const { user } = useAuth();
   const { open } = useQuickAdd();
+  const navigate = useNavigate();
   const s = subject(task.subjectId);
   const p = task.projectId ? projects.find(proj => proj.id === task.projectId) : null;
   const done = task.status === 'COMPLETED';
@@ -52,7 +54,7 @@ export function TaskCard({ task, compact = false }: {task: Task;compact?: boolea
           {done && <CheckIcon className="h-4 w-4 text-ink" strokeWidth={4} aria-hidden />}
         </button>
 
-        <div className="min-w-0 flex-1 cursor-pointer group" onClick={() => open('task', { editTask: task })}>
+        <div className="min-w-0 flex-1 cursor-pointer group" onClick={() => navigate(`/app/tasks/${task.id}`)}>
           <p
             className={`font-display text-base font-bold leading-tight group-hover:underline ${
             done ? 'line-through' : ''}`

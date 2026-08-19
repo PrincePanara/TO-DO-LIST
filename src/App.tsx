@@ -14,6 +14,7 @@ import { PdfAnalysis } from './pages/onboarding/PdfAnalysis';
 import { DetectedSubjects } from './pages/onboarding/DetectedSubjects';
 import { Dashboard } from './pages/Dashboard';
 import { Tasks } from './pages/Tasks';
+import { TaskDetail } from './pages/TaskDetail';
 import { Subjects } from './pages/Subjects';
 import { SubjectWorkspace } from './pages/SubjectWorkspace';
 import { ClassWork } from './pages/ClassWork';
@@ -78,6 +79,7 @@ export function App() {
                 <Route index element={<Navigate to="/app/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="tasks" element={<Tasks />} />
+                <Route path="tasks/:taskId" element={<TaskDetail />} />
                 <Route path="subjects" element={<Subjects />} />
                 <Route path="subjects/:subjectId" element={<SubjectWorkspace />} />
                 <Route path="class-work" element={<ClassWork />} />
