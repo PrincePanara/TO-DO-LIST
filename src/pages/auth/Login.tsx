@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   signInWithEmailAndPassword,
   AuthErrorCodes,
@@ -10,9 +10,6 @@ import { auth } from '../../firebase/config';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ease = [0.23, 1, 0.32, 1] as const;
-
-const DASHBOARD = '/app/dashboard';
-function goToDashboard() { window.location.replace(DASHBOARD); }
 
 function friendlyError(code: string): string {
   switch (code) {
@@ -77,6 +74,7 @@ function Field({
 }
 
 export function Login() {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -84,10 +82,12 @@ export function Login() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
   const [loading, setLoading] = useState(false);
 
-  // Already authenticated → go straight to dashboard
+  // Already authenticated → go to Get Started (Welcome)
   useEffect(() => {
-    if (!authLoading && user) goToDashboard();
-  }, [user, authLoading]);
+    if (!authLoading && user) {
+      navigate('/welcome');
+    }
+  }, [user, authLoading, navigate]);
 
   const validate = () => {
     const e: typeof errors = {};
@@ -105,7 +105,7 @@ export function Login() {
     setErrors({});
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      goToDashboard();
+      navigate('/welcome');
     } catch (err: any) {
       setErrors({ form: friendlyError(err?.code ?? '') });
     } finally {

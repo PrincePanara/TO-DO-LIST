@@ -133,9 +133,8 @@ export function TaskDetail() {
                 toggleTask(task.id);
                 toast(done ? 'Task marked active' : 'Task completed ✓');
               }}
-              className={`flex h-16 w-16 items-center justify-center border-4 border-ink shadow-brut-sm press focus-brut dark:border-white ${
-                done ? 'bg-ok' : 'bg-white text-ink dark:bg-transparent dark:text-white'
-              }`}
+              className={`flex h-16 w-16 items-center justify-center border-4 border-ink shadow-brut-sm press focus-brut dark:border-white ${done ? 'bg-ok' : 'bg-white text-ink dark:bg-transparent dark:text-white'
+                }`}
             >
               <CheckIcon className={`h-8 w-8 ${done ? 'text-ink' : 'opacity-20'}`} strokeWidth={4} />
             </button>
@@ -156,7 +155,7 @@ export function TaskDetail() {
                   <span className="muted ml-1 text-xs font-normal">({dueLabel(task.dueDate)})</span>
                 </dd>
               </div>
-              
+
               <div>
                 <dt className="muted mb-1 text-[10px] font-bold uppercase tracking-widest">Category</dt>
                 <dd><Badge>{categoryLabel[task.category]}</Badge></dd>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -10,9 +10,6 @@ import { auth } from '../../firebase/config';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ease = [0.23, 1, 0.32, 1] as const;
-
-const DASHBOARD = '/app/dashboard';
-function goToDashboard() { window.location.replace(DASHBOARD); }
 
 function friendlyError(code: string): string {
   switch (code) {
@@ -78,6 +75,7 @@ function Field({
 }
 
 export function Signup() {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -90,10 +88,12 @@ export function Signup() {
   }>({});
   const [loading, setLoading] = useState(false);
 
-  // Already authenticated → skip sign-up
+  // Already authenticated → go to Get Started (Welcome)
   useEffect(() => {
-    if (!authLoading && user) goToDashboard();
-  }, [user, authLoading]);
+    if (!authLoading && user) {
+      navigate('/welcome');
+    }
+  }, [user, authLoading, navigate]);
 
   const validate = () => {
     const e: typeof errors = {};
@@ -117,8 +117,7 @@ export function Signup() {
       const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
       // Save the user's display name
       await updateProfile(credential.user, { displayName: name.trim() });
-      // New user → Splash first, then Splash routes to onboarding
-      window.location.replace('/');
+      navigate('/welcome');
     } catch (err: any) {
       setErrors({ form: friendlyError(err?.code ?? '') });
     } finally {
